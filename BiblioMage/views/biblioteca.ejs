@@ -1,0 +1,165 @@
+<%- include('partials/head') %>
+
+<body>
+
+  <nav class="navbar navbar-dark navbar-expand-sm sticky-top" style="background-color: #429374">
+    <div class="container-fluid">
+
+        <div class="collapse navbar-collapse" id="menuNavBar">
+            <div class="navbar-nav">
+                <a href="/" class="nav-item nav-link active">Biblioteca</a>
+                <a href="/estante" class="nav-item nav-link">Estante</a>
+                <a href="/conta" class="nav-item nav-link">Conta</a>
+            </div>
+        </div>
+
+        <a href="/" class="navbar-brand d-flex align-items-center">
+          <strong>BiblioMage</strong>
+          <img src="../public/images/brand.svg" height="25px">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuNavBar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+  </nav>
+
+  <form onsubmit="return buscarItens(event)" class="d-flex m-4">
+    <div class="input-group">
+        <input type="search" id="searchInput" class="form-control" placeholder="Buscar">
+        <button class="btn btn-outline-success" type="submit">Buscar</button>
+    </div>
+  </form>
+
+  <script>
+    function buscarItens(event) {
+        event.preventDefault(); // Evita recarregar a página
+        
+        let termo = document.getElementById("searchInput").value.toLowerCase();
+        let itens = document.querySelectorAll(".card.col-md-2.m-2");
+
+        itens.forEach(item => {
+            if (item.textContent.toLowerCase().includes(termo)) {
+                item.style.display = "block"; // Mostra o item se combinar com a pesquisa
+            } else {
+                item.style.display = "none"; // Oculta o item se não combinar
+            }
+        });
+    }
+  </script>
+
+  <div class="row mt-5">
+    <div class="col-md-11"></div>
+    <div class="col-md-1">
+        <button class="btn" data-bs-toggle="modal" data-bs-target="#addModal" style="background-color: #FDCD81;">
+          <i class="fa fa-plus"></i>
+          Add
+        </button>
+    </div>
+  </div>
+
+  
+
+  <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Novo livro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addForm">
+            <div class="mb-3 form-group">
+              <label for="bookTitle" class="form-label">Título</label>
+              <input type="text" class="form-control" id="bookTitle" placeholder="Título do livro">
+            </div>
+            <div class="mb-3 form-group">
+              <label for="bookGenre" class="form-label">Gênero</label>
+                <input type="text" class="form-control" id="bookGenre" placeholder="Gênero do livro">
+            </div>
+            <div class="mb-3 form-group">
+              <label for="bookPages" class="form-label">Páginas</label>
+                <input type="number" class="form-control" id="bookPages" placeholder="Nº de páginas">
+            </div>  
+            <div class="mb-3 form-group">
+              <label for="bookAutor" class="form-label">Autor</label>
+                <input type="text" class="form-control" id="bookAutor" placeholder="Autor(a) do livro">
+            </div>
+            <div class="mb-3 form-group">
+              <label for="bookEditora" class="form-label">Editora</label>
+                <input type="text" class="form-control" id="bookEditora" placeholder="Editora do livro">
+            </div>
+            <div class="mb-3 form-group">
+              <label for="bookYear" class="form-label">Ano de publicação</label>
+                <input type="text" class="form-control" id="bookYear" placeholder="Ano da publicação">
+            </div>  
+
+            <div class="col-md-3 m-2">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+            
+            <div class="col-md-3 m-2">
+              <input type="submit" class="btn btn-primary" value="Adicionar" data-bs-dismiss="modal"></button>
+            </div> 
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="row" id="cont">
+    
+  </div>
+  
+  <script>
+    async function carregarObjetos() {
+        const resposta = await fetch('http://localhost:3000/fetchBooks');
+        const objetos = await resposta.json();
+        const container = document.getElementById('cont');
+
+        
+        objetos.forEach(obj => {
+          const titulo = obj.title;
+          container.innerHTML += `<div class="card col-md-2 m-2"><div class="card-img-top"></div><div class="card-body text-center"><h5 class="card-title" id="cardTitle">${titulo}</h5><a class="btn btn-primary" on-click="showInfo()">Ver mais</a></div></div>`  
+          
+        });
+    }
+
+    carregarObjetos();
+</script>
+
+  <script>
+    document.getElementById("addForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const title = document.getElementById("bookTitle").value;
+      const genre = document.getElementById("bookGenre").value;
+      const pages = document.getElementById("bookPages").value;
+      const autor = document.getElementById("bookAutor").value;
+      const editora = document.getElementById("bookEditora").value;
+      const year = document.getElementById("bookYear").value;
+
+      document.getElementById("bookTitle").value = "";
+      document.getElementById("bookGenre").value = "";
+      document.getElementById("bookPages").value = "";
+      document.getElementById("bookAutor").value = "";
+      document.getElementById("bookEditora").value = "";
+      document.getElementById("bookYear").value = "";
+
+      try {
+          const response = await axios.post("/add", { title, genre, pages, autor, editora, year });
+          document.body.innerHTML = response.data;
+      } catch (error) {
+          console.error("Erro ao adicionar livro", error);
+      }
+  });
+  </script>
+  <script>
+    
+  </script>
+
+
+</body>
+
+</html>
